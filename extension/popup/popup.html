@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LeadProof</title>
+  <style>
+    body { font-family: Arial, sans-serif; width: 300px; padding: 12px; }
+    h3 { margin-top: 0; }
+    .actions { margin-top: 12px; display:flex; gap:8px; flex-direction:column; }
+    button { padding:8px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h3>LeadProof</h3>
+    <div id="summary">
+      <p><strong id="verifiedCount">—</strong> verified today</p>
+      <p>Average score: <span id="avgScore">—</span></p>
+      <p>Integrations: <span id="integrations">—</span></p>
+    </div>
+    <div class="actions">
+      <button id="connectSite">Connect Website</button>
+      <button id="viewReports">View Reports</button>
+      <button id="settings">Settings</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
