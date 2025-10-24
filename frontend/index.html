@@ -3,61 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LeadProof – Connect Your Website</title>
-  <link rel="icon" href="/favicon.ico">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      max-width: 480px;
-    }
-    h1 { color: #0070f3; }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 1rem;
-    }
-    button {
-      background: #0070f3;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    button:hover {
-      background: #0059c1;
-    }
-    #status { margin-top: 15px; color: green; }
-  </style>
+  <title>LeadProof – Connect Website</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>🔗 Connect Your Website</h1>
-  <p>Enter your LeadProof API key to connect your Chrome extension:</p>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+  <div class="bg-white shadow-lg rounded-lg p-8 w-[400px]">
+    <h1 class="text-2xl font-bold text-center mb-4 text-blue-600">LeadProof</h1>
+    <p class="text-gray-600 text-center mb-6">Sign up to get your API key</p>
 
-  <input id="apiKey" placeholder="Enter your API key" />
-  <button id="saveBtn">Save Key</button>
+    <label class="block text-sm font-medium mb-1">Email</label>
+    <input id="email" type="email" class="border border-gray-300 rounded w-full p-2 mb-3" placeholder="you@example.com" />
 
-  <p id="status"></p>
+    <button id="genBtn" class="bg-blue-600 text-white rounded w-full py-2 hover:bg-blue-700">
+      Generate API Key
+    </button>
+
+    <div id="result" class="mt-4 text-center text-sm text-gray-700"></div>
+
+    <hr class="my-6"/>
+
+    <label class="block text-sm font-medium mb-1">Or connect with existing key</label>
+    <input id="apiKey" type="text" class="border border-gray-300 rounded w-full p-2 mb-3" placeholder="lp_live_..." />
+    <button id="saveBtn" class="bg-green-600 text-white rounded w-full py-2 hover:bg-green-700">
+      Save Key to Extension
+    </button>
+  </div>
 
   <script>
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      const key = document.getElementById('apiKey').value.trim();
-      if (!key) return alert('Please enter your API key');
+    const API_BASE = "https://leadproof-production.up.railway.app"; // your backend
+    const emailInput = document.getElementById("email");
+    const apiKeyInput = document.getElementById("apiKey");
+    const genBtn = document.getElementById("genBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const resultEl = document.getElementById("result");
 
-      // Simulate saving to extension storage
-      if (window.chrome && chrome.runtime) {
+    genBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      if (!email) return alert("Please enter an email");
+      resultEl.textContent = "⏳ Generating...";
+      try {
+        const res = await fetch(`${API_BASE}/create-user`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (data.apiKey) {
+          apiKeyInput.value = data.apiKey;
+          resultEl.innerHTML = `✅ API Key created: <span class="font-mono text-xs">${data.apiKey}</span>`;
+        } else {
+          resultEl.textContent = "⚠️ Could not generate key.";
+        }
+      } catch (e) {
+        console.error(e);
+        resultEl.textContent = "❌ Server error.";
+      }
+    });
+
+    saveBtn.addEventListener("click", () => {
+      const apiKey = apiKeyInput.value.trim();
+      if (!apiKey) return alert("Please enter or generate an API key first.");
+
+      if (window.chrome?.runtime) {
         chrome.runtime.sendMessage(
-          { type: 'LEADPROOF_SAVE_KEY', apiKey: key },
+          { type: "LEADPROOF_SAVE_KEY", apiKey },
           () => {
-            document.getElementById('status').textContent = '✅ API key saved in your extension!';
+            resultEl.textContent = "✅ Key saved to extension. You’re connected!";
           }
         );
       } else {
-        document.getElementById('status').textContent =
-          '⚠️ Please open this page from the LeadProof Chrome extension.';
+        resultEl.textContent = "⚠️ Please open this page from the LeadProof extension.";
       }
     });
   </script>
 </body>
 </html>
+
